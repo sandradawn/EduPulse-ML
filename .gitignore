@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Model binaries & pickles
+*.pkl
+*.cbm
+*.joblib
+models/*.pkl
+models/*.cbm
+models/*.joblib
+
+# Data files (download instructions in README_DATASETS.txt)
+data/raw/*.csv
+data/raw/*.zip
+data/processed/*.csv
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Environment
+.env
+.env.*
+venv/
+env/
+.venv/
+ENV/
+
+# IDE
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and outputs
+*.log
+logs/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/

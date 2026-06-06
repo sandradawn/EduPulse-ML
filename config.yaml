@@ -1,0 +1,39 @@
+paths:
+  uci_mat: data/raw/student-mat.csv
+  uci_por: data/raw/student-por.csv
+  oulad_info: data/raw/studentInfo.csv
+  oulad_vle: data/raw/studentVle.csv
+  oulad_assessment: data/raw/studentAssessment.csv
+  oulad_assessments_meta: data/raw/assessments.csv
+  processed_dir: data/processed/
+  models_dir: models/
+
+training:
+  test_size: 0.2
+  random_state: 42
+  cv_folds: 5
+  use_smote: true
+
+models:
+  catboost:
+    iterations: 500
+    learning_rate: 0.05
+    depth: 6
+    verbose: 0
+  xgboost:
+    n_estimators: 300
+    max_depth: 5
+    learning_rate: 0.1
+    eval_metric: logloss
+  random_forest:
+    n_estimators: 200
+    max_depth: 10
+    min_samples_split: 5
+  mlp:
+    hidden_layer_sizes: [128, 64, 32]
+    max_iter: 500
+    early_stopping: true
+  svm:
+    kernel: rbf
+    C: 1.0
+    probability: true

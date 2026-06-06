@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduPulse — AI Student Performance Predictor</title>
+  <meta name="description" content="EduPulse uses CatBoost, XGBoost, and deep learning to predict student performance with SHAP explainability." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <!-- Animated background -->
+  <canvas id="neuralCanvas"></canvas>
+
+  <div class="app-wrapper">
+
+    <!-- ═══════════════════════════ HERO ═══════════════════════════ -->
+    <header class="hero">
+      <div class="hero-badge">AI-Powered Analytics</div>
+      <h1 class="hero-title"><span class="gradient-text">EduPulse</span></h1>
+      <p class="hero-tagline">Predict. Intervene. Succeed.</p>
+      <p class="hero-sub">Dual-dataset AI engine combining academic & engagement signals to forecast student outcomes with SHAP explainability.</p>
+      <div class="hero-stats">
+        <div class="stat-pill"><span class="stat-num" data-target="94">0</span>%<span class="stat-lbl"> OULAD Accuracy</span></div>
+        <div class="stat-pill"><span class="stat-num" data-target="90">0</span>%<span class="stat-lbl"> UCI Accuracy</span></div>
+        <div class="stat-pill"><span class="stat-num" data-target="5">0</span><span class="stat-lbl"> ML Models</span></div>
+        <div class="stat-pill"><span class="stat-num" data-target="2">0</span><span class="stat-lbl"> Datasets</span></div>
+      </div>
+    </header>
+
+    <!-- ═══════════════════ PREDICTOR PANEL ═══════════════════════ -->
+    <section class="glass-card predictor-section" id="predictor">
+      <div class="section-header">
+        <h2>Student Performance Predictor</h2>
+        <div class="header-actions">
+          <button class="btn btn-ghost btn-sm" id="btnDemoUci" onclick="fillDemoUci()">📚 Demo Academic</button>
+          <button class="btn btn-ghost btn-sm" id="btnDemoOulad" onclick="fillDemoOulad()">💻 Demo Engagement</button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" id="tabUci" onclick="switchTab('uci')">🎓 Academic Profile (UCI)</button>
+        <button class="tab-btn" id="tabOulad" onclick="switchTab('oulad')">📊 Platform Engagement (OULAD)</button>
+      </div>
+
+      <!-- ─── UCI TAB ─── -->
+      <div id="panelUci" class="tab-panel active">
+        <p class="panel-desc">Predict based on demographic, family, and early-grade indicators from the UCI Student Performance dataset.</p>
+        <div class="form-grid cols-3">
+          <div class="field-group">
+            <label>School <span class="tip" title="GP = Gabriel Pereira, MS = Mousinho">?</span></label>
+            <select id="u_school"><option value="GP">GP</option><option value="MS">MS</option></select>
+          </div>
+          <div class="field-group">
+            <label>Sex</label>
+            <select id="u_sex"><option value="F">Female</option><option value="M">Male</option></select>
+          </div>
+          <div class="field-group">
+            <label>Address</label>
+            <select id="u_address"><option value="U">Urban</option><option value="R">Rural</option></select>
+          </div>
+          <div class="field-group">
+            <label>Family Size</label>
+            <select id="u_famsize"><option value="GT3">GT3 (&gt;3)</option><option value="LE3">LE3 (≤3)</option></select>
+          </div>
+          <div class="field-group">
+            <label>Parent Status</label>
+            <select id="u_Pstatus"><option value="T">Together</option><option value="A">Apart</option></select>
+          </div>
+          <div class="field-group">
+            <label>Guardian</label>
+            <select id="u_guardian"><option value="mother">Mother</option><option value="father">Father</option><option value="other">Other</option></select>
+          </div>
+          <div class="field-group">
+            <label>Mother's Job</label>
+            <select id="u_Mjob"><option value="other">Other</option><option value="teacher">Teacher</option><option value="health">Health</option><option value="services">Services</option><option value="at_home">At Home</option></select>
+          </div>
+          <div class="field-group">
+            <label>Father's Job</label>
+            <select id="u_Fjob"><option value="other">Other</option><option value="teacher">Teacher</option><option value="health">Health</option><option value="services">Services</option><option value="at_home">At Home</option></select>
+          </div>
+          <div class="field-group">
+            <label>School Reason</label>
+            <select id="u_reason"><option value="course">Course</option><option value="reputation">Reputation</option><option value="home">Home</option><option value="other">Other</option></select>
+          </div>
+        </div>
+
+        <div class="form-grid cols-3" style="margin-top:1.25rem">
+          <div class="slider-group">
+            <label>Age: <span class="slider-val" id="v_age">17</span></label>
+            <input type="range" id="u_age" min="15" max="22" value="17" oninput="sv('age',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>Mother Edu: <span class="slider-val" id="v_Medu">3</span></label>
+            <input type="range" id="u_Medu" min="0" max="4" value="3" oninput="sv('Medu',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>Father Edu: <span class="slider-val" id="v_Fedu">2</span></label>
+            <input type="range" id="u_Fedu" min="0" max="4" value="2" oninput="sv('Fedu',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>Study Time: <span class="slider-val" id="v_studytime">2</span></label>
+            <input type="range" id="u_studytime" min="1" max="4" value="2" oninput="sv('studytime',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>Failures: <span class="slider-val" id="v_failures">0</span></label>
+            <input type="range" id="u_failures" min="0" max="4" value="0" oninput="sv('failures',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>Absences: <span class="slider-val" id="v_absences">4</span></label>
+            <input type="range" id="u_absences" min="0" max="93" value="4" oninput="sv('absences',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>G1 Grade: <span class="slider-val" id="v_G1">12</span></label>
+            <input type="range" id="u_G1" min="0" max="20" value="12" oninput="sv('G1',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>G2 Grade: <span class="slider-val" id="v_G2">11</span></label>
+            <input type="range" id="u_G2" min="0" max="20" value="11" oninput="sv('G2',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>Goout: <span class="slider-val" id="v_goout">3</span></label>
+            <input type="range" id="u_goout" min="1" max="5" value="3" oninput="sv('goout',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>Daily Alcohol: <span class="slider-val" id="v_Dalc">1</span></label>
+            <input type="range" id="u_Dalc" min="1" max="5" value="1" oninput="sv('Dalc',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>Weekend Alcohol: <span class="slider-val" id="v_Walc">1</span></label>
+            <input type="range" id="u_Walc" min="1" max="5" value="1" oninput="sv('Walc',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>Health: <span class="slider-val" id="v_health">4</span></label>
+            <input type="range" id="u_health" min="1" max="5" value="4" oninput="sv('health',this.value)">
+          </div>
+        </div>
+
+        <div class="toggle-grid">
+          <label class="toggle-wrap"><input type="checkbox" id="u_schoolsup" /><span class="toggler"></span><span>School Support</span></label>
+          <label class="toggle-wrap"><input type="checkbox" id="u_famsup" checked /><span class="toggler"></span><span>Family Support</span></label>
+          <label class="toggle-wrap"><input type="checkbox" id="u_paid" /><span class="toggler"></span><span>Paid Classes</span></label>
+          <label class="toggle-wrap"><input type="checkbox" id="u_activities" checked /><span class="toggler"></span><span>Activities</span></label>
+          <label class="toggle-wrap"><input type="checkbox" id="u_nursery" checked /><span class="toggler"></span><span>Nursery</span></label>
+          <label class="toggle-wrap"><input type="checkbox" id="u_higher" checked /><span class="toggler"></span><span>Wants Higher Ed</span></label>
+          <label class="toggle-wrap"><input type="checkbox" id="u_internet" checked /><span class="toggler"></span><span>Internet at Home</span></label>
+          <label class="toggle-wrap"><input type="checkbox" id="u_romantic" /><span class="toggler"></span><span>Romantic Relation</span></label>
+        </div>
+      </div>
+
+      <!-- ─── OULAD TAB ─── -->
+      <div id="panelOulad" class="tab-panel">
+        <p class="panel-desc">Predict based on Open University VLE engagement, assessment performance and student demographics.</p>
+        <div class="form-grid cols-3">
+          <div class="field-group">
+            <label>Gender</label>
+            <select id="o_gender"><option value="M">Male</option><option value="F">Female</option></select>
+          </div>
+          <div class="field-group">
+            <label>Age Band</label>
+            <select id="o_age_band"><option value="0-35">Under 35</option><option value="35-55">35–55</option><option value="55<=">55+</option></select>
+          </div>
+          <div class="field-group">
+            <label>Disability</label>
+            <select id="o_disability"><option value="N">No</option><option value="Y">Yes</option></select>
+          </div>
+          <div class="field-group">
+            <label>Highest Education</label>
+            <select id="o_highest_education">
+              <option value="A Level or Equivalent">A Level or Equiv.</option>
+              <option value="HE Qualification">HE Qualification</option>
+              <option value="Lower Than A Level">Lower Than A Level</option>
+              <option value="Post Graduate Qualification">Post Graduate</option>
+              <option value="No Formal quals">No Formal Quals</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>IMD Band</label>
+            <select id="o_imd_band">
+              <option value="90-100%">90–100%</option><option value="80-90%">80–90%</option>
+              <option value="70-80%">70–80%</option><option value="60-70%">60–70%</option>
+              <option value="50-60%">50–60%</option><option value="40-50%">40–50%</option>
+              <option value="30-40%">30–40%</option><option value="20-30%">20–30%</option>
+              <option value="10-20%">10–20%</option><option value="0-10%">0–10%</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Region</label>
+            <select id="o_region">
+              <option value="London Region">London</option>
+              <option value="South East Region">South East</option>
+              <option value="Scotland">Scotland</option>
+              <option value="Wales">Wales</option>
+              <option value="North Western Region">North West</option>
+              <option value="East Midlands Region">East Midlands</option>
+              <option value="West Midlands Region">West Midlands</option>
+              <option value="Yorkshire Region">Yorkshire</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Prev Attempts</label>
+            <input type="number" id="o_num_of_prev_attempts" min="0" max="10" value="0" />
+          </div>
+          <div class="field-group">
+            <label>Studied Credits</label>
+            <input type="number" id="o_studied_credits" min="30" max="360" step="30" value="60" />
+          </div>
+        </div>
+
+        <div class="form-grid cols-2" style="margin-top:1.25rem">
+          <div class="slider-group">
+            <label>Total Clicks: <span class="slider-val" id="v_total_clicks">2500</span></label>
+            <input type="range" id="o_total_clicks" min="0" max="10000" value="2500" step="50" oninput="sv('total_clicks',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>Active Days: <span class="slider-val" id="v_active_days">80</span></label>
+            <input type="range" id="o_active_days" min="0" max="260" value="80" oninput="sv('active_days',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>Avg Score: <span class="slider-val" id="v_avg_score">72</span>%</label>
+            <input type="range" id="o_avg_score" min="0" max="100" value="72" oninput="sv('avg_score',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>Submission Rate: <span class="slider-val" id="v_submission_rate">0.9</span></label>
+            <input type="range" id="o_submission_rate" min="0" max="1" step="0.05" value="0.9" oninput="sv('submission_rate',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>Late Submissions: <span class="slider-val" id="v_late_submission_count">1</span></label>
+            <input type="range" id="o_late_submission_count" min="0" max="20" value="1" oninput="sv('late_submission_count',this.value)">
+          </div>
+          <div class="slider-group">
+            <label>Early Activity Ratio: <span class="slider-val" id="v_early_activity_ratio">0.2</span></label>
+            <input type="range" id="o_early_activity_ratio" min="0" max="1" step="0.05" value="0.2" oninput="sv('early_activity_ratio',this.value)">
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── MODEL SELECTOR + PREDICT ─── -->
+      <div class="control-bar">
+        <div class="field-group model-field">
+          <label>AI Model</label>
+          <select id="modelSelect">
+            <option value="catboost">🏆 CatBoost</option>
+            <option value="xgboost">⚡ XGBoost</option>
+            <option value="random_forest">🌲 Random Forest</option>
+            <option value="mlp">🧠 Neural Network (MLP)</option>
+            <option value="svm">📐 SVM</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-predict" id="predictBtn" onclick="runPredict()">
+          <span class="btn-label">Predict Performance</span>
+          <span class="spinner hidden"></span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ═══════════════════ RESULT CARD ═══════════════════════════ -->
+    <section class="glass-card result-section hidden" id="resultSection">
+      <div class="section-header">
+        <h2>Prediction Result</h2>
+        <div id="riskChip" class="risk-chip">Low Risk</div>
+      </div>
+
+      <div class="result-grid">
+        <!-- Circular Gauge -->
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 120 120">
+            <circle class="gauge-bg" cx="60" cy="60" r="50"/>
+            <circle class="gauge-fill" id="gaugeFill" cx="60" cy="60" r="50"/>
+          </svg>
+          <div class="gauge-inner">
+            <div class="pred-label" id="predLabel">Pass</div>
+            <div class="conf-val" id="confVal">0%</div>
+            <div class="conf-sub">confidence</div>
+          </div>
+        </div>
+
+        <!-- Details -->
+        <div class="result-details">
+          <h3>What This Means</h3>
+          <p id="resultExplanation" class="explanation-text">—</p>
+
+          <div class="shap-section">
+            <h4>Key Risk Factors <span class="shap-badge">SHAP</span></h4>
+            <div id="shapBars" class="shap-bars"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════ MODEL COMPARISON ═══════════════════════════ -->
+    <section class="glass-card comparison-section" id="comparison">
+      <div class="section-header">
+        <h2>Model Leaderboard</h2>
+        <span class="badge-accent">Live Metrics</span>
+      </div>
+
+      <div class="comparison-grid">
+        <div class="table-wrap">
+          <table class="comp-table" id="compTable">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>UCI Acc</th>
+                <th>UCI F1</th>
+                <th>OULAD Acc</th>
+                <th>OULAD F1</th>
+              </tr>
+            </thead>
+            <tbody id="compTbody">
+              <tr><td colspan="5" class="loading-row">Loading metrics…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="chart-area">
+          <h3>Accuracy Comparison</h3>
+          <div id="accChart" class="acc-chart"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════ BATCH PREDICTION ════════════════════ -->
+    <section class="glass-card batch-section" id="batch">
+      <div class="section-header">
+        <h2>Batch Prediction</h2>
+        <a href="/static/sample_batch.csv" download class="btn btn-ghost btn-sm">⬇ Sample CSV</a>
+      </div>
+      <p class="panel-desc">Upload a CSV file matching the UCI schema to get predictions for all rows at once.</p>
+
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div class="drop-icon">📂</div>
+        <p class="drop-text">Drag & drop CSV here, or <span class="drop-link">browse</span></p>
+        <input type="file" id="fileInput" accept=".csv" class="hidden-input" onchange="onFileSelected(this)"/>
+      </div>
+
+      <div id="fileInfo" class="file-info hidden">
+        <span class="file-name-label" id="fileNameLabel">—</span>
+        <div class="batch-controls">
+          <select id="batchDataset">
+            <option value="uci">Academic (UCI)</option>
+            <option value="oulad">Engagement (OULAD)</option>
+          </select>
+          <button class="btn btn-primary" id="batchRunBtn" onclick="runBatch()">Run Batch Predict</button>
+        </div>
+      </div>
+
+      <div id="batchResult" class="batch-result hidden">
+        <div class="batch-result-header">
+          <h3>Preview (first 5 rows)</h3>
+          <button class="btn btn-ghost btn-sm" onclick="downloadBatchCSV()">⬇ Download All Results</button>
+        </div>
+        <div class="table-wrap">
+          <table class="comp-table" id="batchTable">
+            <thead>
+              <tr><th>Row</th><th>Prediction</th><th>Confidence</th><th>Risk</th><th>Top Risk Factor</th></tr>
+            </thead>
+            <tbody id="batchTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <p>EduPulse · AI Student Performance Analytics · Built by <strong>Sandra Dawn</strong> · <a href="https://github.com/sandradawn/EduPulse-ML" target="_blank">GitHub</a></p>
+    </footer>
+  </div>
+
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

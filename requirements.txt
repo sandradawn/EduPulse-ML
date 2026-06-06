@@ -1,0 +1,17 @@
+flask>=3.0
+flask-cors
+catboost
+xgboost
+scikit-learn>=1.4
+imbalanced-learn
+shap
+pandas
+numpy
+joblib
+marshmallow
+pyyaml
+matplotlib
+seaborn
+jupyter
+pytest
+requests
